@@ -38,27 +38,28 @@ app.get('/page/count', (req, res) => {
   })
 })
 
-app.get('/count/:page', (req, res) => {
-  const directoryPath = `src/folder/${req.params.page}`
-  console.log(directoryPath)
+app.get('/count/:page', async (req, res) => {
+  fs.readdir('src/folder', { withFileTypes: true }, (_err, files1) => {
+    const directoryPath = `src/folder/${files1[+(req.params.page) - 1].name}`
 
-  fs.readdir(directoryPath, (err, files) => {
-    if (err) {
-      console.error('Error reading directory:', err)
-      res.status(500).json({ error: 'Internal Server Error' })
-    }
-    else {
-      const fileCount = files.length
-      const fileList = files.map(file => ({
-        name: file,
-        url: `/count/detail/${req.params.page}/${encodeURIComponent(file)}`,
-      }))
+    fs.readdir(directoryPath, (err, files) => {
+      if (err) {
+        console.error('Error reading directory:', err)
+        res.status(500).json({ error: 'Internal Server Error' })
+      }
+      else {
+        const fileCount = files.length
+        const fileList = files.map(file => ({
+          name: file,
+          url: `/count/detail/${files1[+(req.params.page) - 1].name}/${encodeURIComponent(file)}`,
+        }))
 
-      res.json({
-        count: fileCount,
-        fileList,
-      })
-    }
+        res.json({
+          count: fileCount,
+          fileList,
+        })
+      }
+    })
   })
 })
 
